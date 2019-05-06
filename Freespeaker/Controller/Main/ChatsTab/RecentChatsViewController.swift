@@ -19,6 +19,8 @@ class RecentChatsViewController: UIViewController, RecentChatCellDelegate {
     fileprivate var filteredChats = [NSDictionary]()
     fileprivate var recentChatsListener: ListenerRegistration?
     
+    fileprivate var chatManager = ChatManager()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -162,16 +164,16 @@ extension RecentChatsViewController: UITableViewDelegate, UITableViewDataSource 
     
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         let recent = getRecentChatWithCondition(at: indexPath)
-        var muteTitle = "Unmute"
-        var shouldMute = false
+        var muteTitle = "Mute"
+        var shouldMute = true
         
-        if let membersToPush = recent[kMEMBERSTOPUSH] as? String, membersToPush.contains(FIRUser.currentId()) {
-            muteTitle = "Mute"
-            shouldMute = true
+        if let membersToPush = recent[kMEMBERSTOPUSH] as? [String], !membersToPush.contains(FIRUser.currentId()) {
+            muteTitle = "Unmute"
+            shouldMute = false
         }
         
         let mute = UITableViewRowAction(style: .default, title: muteTitle) { (action, indexPath) in
-            self.muteChat(action: action, at: indexPath, shouldMute: shouldMute)
+            self.muteChat(recent: recent, mute: shouldMute)
         }
         let delete = UITableViewRowAction(style: .destructive, title: "Delete", handler: deleteChat)
         mute.backgroundColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1)
@@ -197,10 +199,18 @@ extension RecentChatsViewController: UITableViewDelegate, UITableViewDataSource 
         return cell
     }
     
-    fileprivate func muteChat(action: UITableViewRowAction, at indexPath: IndexPath, shouldMute: Bool) {
-//        let recent = getRecentChatWithCondition(at: indexPath)
+    fileprivate func muteChat(recent: NSDictionary, mute: Bool) {
+        guard let chatroomID = recent[kCHATROOMID] as? String else { return }
+        guard let members = recent[kMEMBERS] as? [String] else { return }
+        guard var membersToPush = recent[kMEMBERSTOPUSH] as? [String] else { return }
         
+        if mute {
+            membersToPush = membersToPush.filter { $0 != FIRUser.currentId() }
+        } else {
+            membersToPush.append(FIRUser.currentId())
+        }
         
+        chatManager.updateExistingRecent(with: [kMEMBERSTOPUSH: membersToPush], for: chatroomID, withMembers: members)
     }
     
     fileprivate func deleteChat(action: UITableViewRowAction, at indexPath: IndexPath) {
@@ -220,7 +230,7 @@ extension RecentChatsViewController: UITableViewDelegate, UITableViewDataSource 
         tableView.deleteRows(at: [indexPath], with: .automatic)
         reference(.Recent).document(recentID).delete()
     }
-    
+
 }
 
 extension RecentChatsViewController: UISearchResultsUpdating {

@@ -20,7 +20,7 @@ class PicturesCollectionViewController: UICollectionViewController {
         navigationItem.title = "All Pictures"
         
         if allImageLinks.count > 0 {
-            downloadImages()//dsds
+            downloadImages()
         }
     }
     

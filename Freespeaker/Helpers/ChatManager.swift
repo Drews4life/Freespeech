@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Firebase
 
 class ChatManager {
     
@@ -139,14 +140,16 @@ class ChatManager {
         }
     }
     
-    func updateRecents(chatroomID: String, memberIDs: [String], lastMessage: String) {
-        reference(.Recent).whereField(kCHATROOMID, isEqualTo: chatroomID).getDocuments { (snapshot, error) in
-            if let err = error {
-                print("Error occured while getting chat ids: \(err.localizedDescription)")
-                return
-            }
+    func updateRecents(chatroomID: String, lastMessage: String) {
+        getRecentChatrooms(chatroomID: chatroomID) { (documents) in
+            guard let documents = documents else { return }
             
-            
+            documents.forEach({ (recent) in
+                let currentRecent = recent.data() as NSDictionary
+                if let userId = currentRecent[kUSERID] as? String, userId == FIRUser.currentId() {
+                    self.updateRecentsItem(for: currentRecent, lastMessage: lastMessage)
+                }
+            })
         }
     }
     
@@ -165,27 +168,84 @@ class ChatManager {
     }
     
     func clearRecentCounter(chatroomID: String) {
-        reference(.Recent).whereField(kCHATROOMID, isEqualTo: chatroomID).getDocuments { (snapshot, error) in
-            if let err = error {
-                print("Could not get chat ids with error: \(err.localizedDescription)")
-                return
-            }
+        getRecentChatrooms(chatroomID: chatroomID) { (documents) in
+            guard let documents = documents else { return }
             
-            guard let snapshot = snapshot else { return }
-            if !snapshot.isEmpty {
-                snapshot.documents.forEach({ (recent) in
-                    let currentRecent = recent.data() as NSDictionary
-                    
-                    if let userId = currentRecent[kUSERID] as? String, userId == FIRUser.currentId() {
-                        self.clearRecentCounterItem(for: currentRecent)
-                    }
-                })
-            }
+            documents.forEach({ (recent) in
+                let currentRecent = recent.data() as NSDictionary
+                if let userId = currentRecent[kUSERID] as? String, userId == FIRUser.currentId() {
+                    self.clearRecentCounterItem(for: currentRecent)
+                }
+            })
         }
     }
     
     private func clearRecentCounterItem(for recent: NSDictionary) {
         guard let recentID = recent[kRECENTID] as? String else { return }
         reference(.Recent).document(recentID).updateData([kCOUNTER: 0])
+    }
+    
+    func updateExistingRecent(with values: [String: Any], for chatroomID: String, withMembers members: [String]) {
+        getRecentChatrooms(chatroomID: chatroomID) { (documents) in
+            guard let documents = documents else { return }
+            
+            documents.forEach({ (recent) in
+                let currentRecent = recent.data() as NSDictionary
+                self.updateRecent(recentID: currentRecent[kRECENTID] as? String ?? "", with: values)
+            })
+        }
+    }
+    
+    private func updateRecent(recentID: String, with values: [String: Any]) {
+        reference(.Recent).document(recentID).updateData(values)
+    }
+    
+    func block(user: FIRUser) {
+        let userId1 = FIRUser.currentId()
+        let userId2 = user.objectId
+        
+        var chatroomID = ""
+        
+        let value = userId1.compare(userId2).rawValue
+        
+        if value < 0 {
+            chatroomID = userId1 + userId2
+        } else {
+            chatroomID = userId2 + userId1
+        }
+        
+        getRecents(for: chatroomID)
+    }
+    
+    func getRecents(for chatroomID: String) {
+        getRecentChatrooms(chatroomID: chatroomID) { (documents) in
+            guard let documents = documents else { return }
+            
+            documents.forEach({ (recent) in
+                let currentRecent = recent.data() as NSDictionary
+                self.deleteRecentChat(recent: currentRecent)
+            })
+        }
+    }
+    
+    func deleteRecentChat(recent: NSDictionary) {
+        guard let recentID = recent[kRECENTID] as? String else { return }
+        reference(.Recent).document(recentID).delete()
+    }
+    
+    private func getRecentChatrooms(chatroomID: String, completion: @escaping ([QueryDocumentSnapshot]?) -> Void) {
+        reference(.Recent).whereField(kCHATROOMID, isEqualTo: chatroomID).getDocuments { (snapshot, error) in
+            if let err = error {
+                print("Could not get chats by id: \(err.localizedDescription)")
+                return completion(nil)
+            }
+            
+            guard let snapshot = snapshot else { return completion(nil) }
+            if !snapshot.isEmpty {
+                completion(snapshot.documents)
+            } else {
+                completion(nil)
+            }
+        }
     }
 }

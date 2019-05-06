@@ -77,7 +77,7 @@ class OutgoingMessage {
                     }
                 })
         }
-
+        ChatManager().updateRecents(chatroomID: chatroomID, lastMessage: messageDictionary[kMESSAGE] as? String ?? "")
         //send push
     }
     
