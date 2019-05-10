@@ -26,11 +26,16 @@ public let USER_PROFILE_VC = "userProfileVC"
 public let CHAT_VC = "chatDetailVC"
 public let MAP_VC = "mapVC"
 public let PICTURE_VC = "picturesVC"
+public let CONTACTS_VC = "contactsVC"
+public let CREATE_NEW_GROUP_VC = "createNewGroupVC"
 
 //CELL REUSE IDs
 public let USER_CONTACT_CELL = "userContactCell"
 public let RECENT_CHAT_CELL = "recentChatCell"
 public let PICTURE_CELL = "pictureCell"
+public let BLOCKED_USER_CELL = "blockedUserCell"
+public let BACKGROUND_CELL = "backgroundCell"
+public let GROUP_MEMBER_CELL = "groupMemberCell"
 
 //IDS and Keys
 public let kFILEREFERENCE = "gs://freespeaker-1c889.appspot.com"
@@ -73,7 +78,7 @@ public let kBLOCKEDUSERID = "blockedUserId"
 
 
 //
-public let kBACKGROUBNDIMAGE = "backgroundImage"
+public let kBACKGROUNDIMAGE = "backgroundImage"
 public let kSHOWAVATAR = "showAvatar"
 public let kPASSWORDPROTECT = "passwordProtect"
 public let kFIRSTRUN = "firstRun"
@@ -138,7 +143,6 @@ public let kDEVICEID = "deviceId"
 
 
 //Call
-
 public let kISINCOMING = "isIncoming"
 public let kCALLERID = "callerId"
 public let kCALLERFULLNAME = "callerFullName"

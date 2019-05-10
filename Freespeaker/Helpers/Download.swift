@@ -298,7 +298,7 @@ class Downloader {
     }
 
 
-    fileprivate func getDocumentsURL() -> URL {
+    func getDocumentsURL() -> URL {
         
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last
         

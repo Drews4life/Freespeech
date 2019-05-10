@@ -17,6 +17,34 @@ import Firebase
 
 class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, IQAudioRecorderViewControllerDelegate {
     
+    static func populateSingleChat(withUser: FIRUser) -> ChatViewController {
+        let members = [FIRUser.currentId(), withUser.objectId]
+        
+        let chatVC = ChatViewController()
+        chatVC.titleHeader = withUser.fullname
+        chatVC.membersToPush = members
+        chatVC.memberIDs = members
+        chatVC.chatroomID = ChatManager().startPrivateChat(user1: FIRUser.currentUser()!, user2: withUser)
+        chatVC.isGroup = false
+        chatVC.hidesBottomBarWhenPushed = true
+        
+        return chatVC
+    }
+    
+    static func populateGroupChat(withGroup: Group) -> ChatViewController {
+        ChatManager().startGroupChat(group: withGroup)
+        
+        let chatVC = ChatViewController()
+        chatVC.titleHeader = withGroup.groupDictionary[kNAME] as? String ?? ""
+        chatVC.membersToPush = withGroup.groupDictionary[kMEMBERSTOPUSH] as? [String] ?? []
+        chatVC.memberIDs = withGroup.groupDictionary[kMEMBERS] as? [String] ?? []
+        chatVC.chatroomID = withGroup.groupDictionary[kGROUPID] as? String ?? ""
+        chatVC.isGroup = true
+        chatVC.hidesBottomBarWhenPushed = true
+        
+        return chatVC
+    }
+    
     fileprivate let appDelegate = UIApplication.shared.delegate as? AppDelegate
     
     fileprivate let outgoingBubble = JSQMessagesBubbleImageFactory()?.outgoingMessagesBubbleImage(with: #colorLiteral(red: 0.1019607857, green: 0.2784313858, blue: 0.400000006, alpha: 1))
@@ -92,6 +120,8 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        JSQMessagesCollectionViewCell.registerMenuAction(#selector(delete))
+        
         senderId = FIRUser.currentId()
         senderDisplayName = FIRUser.currentUser()?.firstname
         inputToolbar.contentView.rightBarButtonItem.setImage(#imageLiteral(resourceName: "mic"), for: .normal)
@@ -101,6 +131,10 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
         
         collectionView.collectionViewLayout.incomingAvatarViewSize = .zero
         collectionView.collectionViewLayout.outgoingAvatarViewSize = .zero
+        
+        if isGroup == true {
+            getCurrentGroup()
+        }
         
         createTypingListener()
         loadMessages()
@@ -243,6 +277,35 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
         profileImgBtn.addTarget(self, action: #selector(onShowUserClick), for: .touchUpInside)
     }
     
+    fileprivate func setupUIForGroupChat() {
+        guard let group = group else { return }
+        
+        imageFromData(pictureData: group[kAVATAR] as? String ?? "") { (image) in
+            guard let image = image?.circleMasked else { return }
+            self.profileImgBtn.setImage(image.withRenderingMode(.alwaysOriginal), for: .normal)
+        }
+        
+        titleLbl.text = titleHeader
+        statusLbl.text = ""
+    }
+    
+    fileprivate func getCurrentGroup() {
+        reference(.Group).document(chatroomID).getDocument { (snapshot, error) in
+            if let err = error {
+                print("Could not get groups: \(err.localizedDescription)")
+                return
+            }
+            
+            guard let snapshot = snapshot else { return }
+            
+            if snapshot.exists {
+                guard let dataDictionary = snapshot.data() as? NSDictionary else { return }
+                self.group = dataDictionary
+                self.setupUIForGroupChat()
+            }
+        }
+    }
+    
     override func didPressAccessoryButton(_ sender: UIButton!) {
         let camera = Camera(_delegate: self)
         
@@ -361,6 +424,27 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
     
     func audioRecorderControllerDidCancel(_ controller: IQAudioRecorderViewController) {
         controller.dismiss(animated: true, completion: nil)
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
+        super.collectionView(collectionView, shouldShowMenuForItemAt: indexPath)
+        return true
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
+        if messages[indexPath.row].isMediaMessage {
+            return action.description == "delete:"
+        } else {
+            return action.description == "delete:" || action.description == "copy:"
+        }
+    }
+    
+    override func collectionView(_ collectionView: JSQMessagesCollectionView!, didDeleteMessageAt indexPath: IndexPath!) {
+        guard let messageID = objectMessages[indexPath.row][kMESSAGEID] as? String else { return }
+        objectMessages.remove(at: indexPath.row)
+        messages.remove(at: indexPath.row)
+        
+        OutgoingMessage.deleteMessage(withID: messageID, chatID: chatroomID)
     }
     
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, avatarImageDataForItemAt indexPath: IndexPath!) -> JSQMessageAvatarImageDataSource! {
@@ -841,6 +925,10 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
                 }
             }
         }
+    }
+    
+    @objc fileprivate func deleteMessage() {
+        
     }
     
     //MARK: Location

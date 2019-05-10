@@ -38,7 +38,7 @@ class ChatManager {
         guard let chatroomID = recent[kCHATROOMID] as? String else { return }
         guard let currentUser = FIRUser.currentUser() else { return }
         
-        let withUsername = recent[kWITHUSERUSERNAME] as? String ?? ""
+        let withUsername = (recent[kWITHUSERUSERNAME] as? String ?? recent[kWITHUSERFULLNAME] as? String) ?? ""
         
         if let recentType = recent[kTYPE] as? String, recentType == kPRIVATE {
             createRecent(members: members, chatroomID: chatroomID, username: currentUser.fullname, type: kPRIVATE, users: [currentUser], avatarGroup: nil)
@@ -74,6 +74,16 @@ class ChatManager {
                     self.createRecentItems(userID: userID, chatroomID: chatroomID, members: members, username: username, type: type, users: users, avatarGroup: avatarGroup)
                 })
         }
+    }
+    
+    func startGroupChat(group: Group) {
+        let chatroomID = group.groupDictionary[kGROUPID] as? String ?? ""
+        let members = group.groupDictionary[kMEMBERS] as? [String] ?? []
+        createRecent(members: members, chatroomID: chatroomID, username: group.groupDictionary[kNAME] as? String ?? "", type: kGROUP, users: nil, avatarGroup: group.groupDictionary[kAVATAR] as? String)
+    }
+    
+    func createRecentForNewMembers(groupID: String, groupName: String, membersToPush: [String], avatar: String) {
+        createRecent(members: membersToPush, chatroomID: groupID, username: groupName, type: kGROUP, users: nil, avatarGroup: avatar)
     }
     
     private func createRecentItems(userID: String, chatroomID: String, members: [String], username: String, type: String, users: [FIRUser]?, avatarGroup: String?) {

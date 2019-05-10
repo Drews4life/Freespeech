@@ -342,6 +342,10 @@ func fetchCurrentUserFromFirestore(userId: String) {
     
 }
 
+func checkUserBlockedStatus(with user: FIRUser) -> Bool {
+    return user.blockedUsers.contains(FIRUser.currentId())
+}
+
 
 func fetchCurrentUserFromFirestore(userId: String, completion: @escaping (_ user: FIRUser?)->Void) {
     

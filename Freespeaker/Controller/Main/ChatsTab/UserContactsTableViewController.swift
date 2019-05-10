@@ -173,7 +173,13 @@ class UserContactsTableViewController: UITableViewController, UISearchResultsUpd
         guard let user = getUserWithCondition(at: indexPath) else { return }
         guard let currentUser = FIRUser.currentUser() else { return }
         
-        ChatManager().startPrivateChat(user1: currentUser, user2: user)
+        if !checkUserBlockedStatus(with: user) {
+            let chatVC = ChatViewController.populateSingleChat(withUser: user)
+            
+            navigationController?.pushViewController(chatVC, animated: true)
+        } else {
+            ProgressHUD.showError("You are blacklisted by this user.")
+        }
     }
     
     func didClickProfileImage(at indexPath: IndexPath) {

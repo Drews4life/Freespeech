@@ -71,7 +71,10 @@ class RecentChatsViewController: UIViewController, RecentChatCellDelegate {
     }
     
     @objc fileprivate func onNewGroupClick() {
+        guard let newGroupVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: CONTACTS_VC) as? NewGroupViewController else { return }
+        newGroupVC.hidesBottomBarWhenPushed = true
         
+        navigationController?.pushViewController(newGroupVC, animated: true)
     }
     
     @IBAction func onCreateNewChatClick(_ sender: Any) {

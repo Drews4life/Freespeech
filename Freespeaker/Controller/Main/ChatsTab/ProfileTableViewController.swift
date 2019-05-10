@@ -18,6 +18,8 @@ class ProfileTableViewController: UITableViewController {
     @IBOutlet fileprivate weak var messageBtn: UIButton!
     @IBOutlet fileprivate weak var blockBtn: UIButton!
     
+    fileprivate let chatManager = ChatManager()
+    
     var user: FIRUser?
     
     deinit {
@@ -70,7 +72,11 @@ class ProfileTableViewController: UITableViewController {
     }
     
     @IBAction func onMessageBtnClick(_ sender: Any) {
-        
+        guard let user = user else { return }
+        if !checkUserBlockedStatus(with: user) {
+            let chatVC = ChatViewController.populateSingleChat(withUser: user)
+            navigationController?.pushViewController(chatVC, animated: true)
+        }
     }
     
     @IBAction func onBlockUserClick(_ sender: Any) {
@@ -95,6 +101,8 @@ class ProfileTableViewController: UITableViewController {
                 self.checkBlockStatus()
             }
         }
+        
+        chatManager.block(user: userToBlock)
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {

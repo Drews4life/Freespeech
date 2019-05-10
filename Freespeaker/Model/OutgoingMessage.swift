@@ -82,7 +82,7 @@ class OutgoingMessage {
     }
     
     static func deleteMessage(withID id: String, chatID: String) {
-        
+        reference(.Message).document(FIRUser.currentId()).collection(chatID).document(id).delete()
     }
     
     static func updateMessage(withID id: String, chatID: String, memberIDs: [String]) {
