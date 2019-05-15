@@ -110,6 +110,8 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
     fileprivate var jsqAvatarDictionary: NSMutableDictionary?
     fileprivate var avatarImageDictionary: NSMutableDictionary?
     
+    fileprivate var defaults = UserDefaults.standard
+    
     fileprivate var showAvatars = true
     fileprivate var initiallyLoaded = false
     fileprivate var loadOld = false
@@ -119,6 +121,8 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        loadBackgroundDefaults()
         
         JSQMessagesCollectionViewCell.registerMenuAction(#selector(delete))
         
@@ -152,6 +156,27 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
         super.viewWillDisappear(animated)
         
         chatManager.clearRecentCounter(chatroomID: chatroomID)
+    }
+    
+    fileprivate func loadBackgroundDefaults() {
+        firstLoad = defaults.bool(forKey: kFIRSTRUN)
+        
+        if !firstLoad! {
+            defaults.set(true, forKey: kFIRSTRUN)
+            defaults.set(showAvatars, forKey: kSHOWAVATAR)
+        }
+        
+        showAvatars = defaults.bool(forKey: kSHOWAVATAR)
+        
+        
+        if let bg = defaults.object(forKey: kBACKGROUNDIMAGE) as? String {
+            collectionView.backgroundColor = .clear
+            let image = UIImage(named: bg) ?? UIImage()
+            let imageView = UIImageView(image: image)
+            imageView.contentMode = .center
+            
+            view.insertSubview(imageView, at: 0)
+        }
     }
     
     fileprivate func setupNavigationBar() {
@@ -245,7 +270,10 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
     }
     
     @objc fileprivate func onShowGroupClick() {
-        print("group header click")
+        guard let groupVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: GROUP_VC) as? GroupViewController else { return }
+        groupVC.group = group
+        
+        navigationController?.pushViewController(groupVC, animated: true)
     }
     
     @objc fileprivate func onShowUserClick() {
@@ -594,12 +622,14 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
         let group = DispatchGroup()
         
         if let text = text {
-            outgoingMessage = OutgoingMessage(message: text, senderID: currentUser.objectId, senderName: currentUser.fullname, date: date, status: kDELIVERED, type: kTEXT)
+            let encryptedText = Encryption.encrypt(chatID: chatroomID, message: text)
+            outgoingMessage = OutgoingMessage(message: encryptedText, senderID: currentUser.objectId, senderName: currentUser.fullname, date: date, status: kDELIVERED, type: kTEXT)
         } else if let picture = picture {
             group.enter()
             downloader.uploadImage(image: picture, chatRoomId: chatroomID, view: view) { (urlString) in
                 if let imageLink = urlString {
-                    outgoingMessage = OutgoingMessage(message: "[\(kPICTURE)]", pictureLink: imageLink, senderID: currentUser.objectId, senderName: currentUser.fullname, date: date, status: kDELIVERED, type: kPICTURE)
+                    let encryptedText = Encryption.encrypt(chatID: self.chatroomID, message: "[\(kPICTURE)]")
+                    outgoingMessage = OutgoingMessage(message: encryptedText, pictureLink: imageLink, senderID: currentUser.objectId, senderName: currentUser.fullname, date: date, status: kDELIVERED, type: kPICTURE)
                 }
                 group.leave()
             }
@@ -610,7 +640,8 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
             group.enter()
             downloader.uploadVideo(video: videoData, chatRoomId: chatroomID, view: view) { (videoURL) in
                 if let videoLink = videoURL {
-                    outgoingMessage = OutgoingMessage(message: "[\(kVIDEO)]", videoLink: videoLink, thumbnail: thumbnail as NSData, senderID: currentUser.objectId, senderName: currentUser.fullname, date: date, status: kDELIVERED, type: kVIDEO)
+                    let encryptedText = Encryption.encrypt(chatID: self.chatroomID, message: "[\(kVIDEO)]")
+                    outgoingMessage = OutgoingMessage(message: encryptedText, videoLink: videoLink, thumbnail: thumbnail as NSData, senderID: currentUser.objectId, senderName: currentUser.fullname, date: date, status: kDELIVERED, type: kVIDEO)
                 }
                 group.leave()
             }
@@ -618,7 +649,8 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
             group.enter()
             downloader.uploadAudio(autioPath: audio, chatRoomId: chatroomID, view: view) { (audioURL) in
                 if let audioLink = audioURL {
-                    outgoingMessage = OutgoingMessage(message: "[\(kAUDIO)]", audioLink: audioLink, senderID: currentUser.objectId, senderName: currentUser.fullname, date: date, status: kDELIVERED, type: kAUDIO)
+                    let encryptedText = Encryption.encrypt(chatID: self.chatroomID, message: "[\(kAUDIO)]")
+                    outgoingMessage = OutgoingMessage(message: encryptedText, audioLink: audioLink, senderID: currentUser.objectId, senderName: currentUser.fullname, date: date, status: kDELIVERED, type: kAUDIO)
                 }
                 group.leave()
             }
@@ -627,8 +659,9 @@ class ChatViewController: JSQMessagesViewController, UIImagePickerControllerDele
             
             let latitude = NSNumber(value: coords.latitude)
             let longitude = NSNumber(value: coords.longitude)
+            let encryptedText = Encryption.encrypt(chatID: chatroomID, message: "[\(locationKey)]")
             
-            outgoingMessage = OutgoingMessage(message: "[\(locationKey)]", latitude: latitude, longitude: longitude, senderID: currentUser.objectId, senderName: currentUser.fullname, date: date, status: kDELIVERED, type: kLOCATION)
+            outgoingMessage = OutgoingMessage(message: encryptedText, latitude: latitude, longitude: longitude, senderID: currentUser.objectId, senderName: currentUser.fullname, date: date, status: kDELIVERED, type: kLOCATION)
         }
         
         group.notify(queue: .main) {

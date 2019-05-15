@@ -10,6 +10,9 @@
 		3DFFF182633F0A4E55294754 /* Pods_Freespeaker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5911082B9C7EE7CCC5C50A24 /* Pods_Freespeaker.framework */; };
 		66051C612274D775005D7125 /* PhotoMediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66051C602274D775005D7125 /* PhotoMediaItem.swift */; };
 		66061F7C2284343400ACA65A /* NewGroupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66061F7B2284343400ACA65A /* NewGroupViewController.swift */; };
+		660801D52286F78400286A54 /* GroupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660801D42286F78400286A54 /* GroupViewController.swift */; };
+		660801D7228835E600286A54 /* InviteUsersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660801D6228835E600286A54 /* InviteUsersViewController.swift */; };
+		660801D9228880EF00286A54 /* Encryption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660801D8228880EF00286A54 /* Encryption.swift */; };
 		66081FEC2261E9F300670CE9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66081FEB2261E9F300670CE9 /* AppDelegate.swift */; };
 		66081FEE2261E9F300670CE9 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66081FED2261E9F300670CE9 /* WelcomeViewController.swift */; };
 		66081FF12261E9F300670CE9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 66081FEF2261E9F300670CE9 /* Main.storyboard */; };
@@ -54,6 +57,9 @@
 		5911082B9C7EE7CCC5C50A24 /* Pods_Freespeaker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Freespeaker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		66051C602274D775005D7125 /* PhotoMediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMediaItem.swift; sourceTree = "<group>"; };
 		66061F7B2284343400ACA65A /* NewGroupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewGroupViewController.swift; sourceTree = "<group>"; };
+		660801D42286F78400286A54 /* GroupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupViewController.swift; sourceTree = "<group>"; };
+		660801D6228835E600286A54 /* InviteUsersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteUsersViewController.swift; sourceTree = "<group>"; };
+		660801D8228880EF00286A54 /* Encryption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Encryption.swift; sourceTree = "<group>"; };
 		66081FE82261E9F300670CE9 /* Freespeaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Freespeaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		66081FEB2261E9F300670CE9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		66081FED2261E9F300670CE9 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
@@ -205,6 +211,7 @@
 				660D6DCD226646A800D479DB /* Download.swift */,
 				660D6DCF2266471500D479DB /* CountryCode.swift */,
 				660D6DD12266477000D479DB /* Camera.swift */,
+				660801D8228880EF00286A54 /* Encryption.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -232,6 +239,8 @@
 				6653AA31227F562500A60583 /* PicturesCollectionViewController.swift */,
 				66061F7B2284343400ACA65A /* NewGroupViewController.swift */,
 				6608B16F2285B0CF00C00701 /* CreateNewGroupViewController.swift */,
+				660801D42286F78400286A54 /* GroupViewController.swift */,
+				660801D6228835E600286A54 /* InviteUsersViewController.swift */,
 			);
 			path = ChatsTab;
 			sourceTree = "<group>";
@@ -386,6 +395,7 @@
 				"${BUILT_PRODUCTS_DIR}/MBProgressHUD/MBProgressHUD.framework",
 				"${BUILT_PRODUCTS_DIR}/ProgressHUD/ProgressHUD.framework",
 				"${BUILT_PRODUCTS_DIR}/Protobuf/Protobuf.framework",
+				"${BUILT_PRODUCTS_DIR}/RNCryptor/RNCryptor.framework",
 				"${BUILT_PRODUCTS_DIR}/SCSiriWaveformView/SCSiriWaveformView.framework",
 				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
 				"${BUILT_PRODUCTS_DIR}/gRPC-C++/grpcpp.framework",
@@ -410,6 +420,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MBProgressHUD.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ProgressHUD.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Protobuf.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RNCryptor.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SCSiriWaveformView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SDWebImage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/grpcpp.framework",
@@ -433,9 +444,11 @@
 				6609D80B2283399D009F0F02 /* BackgroundsCollectionView.swift in Sources */,
 				66051C612274D775005D7125 /* PhotoMediaItem.swift in Sources */,
 				660D6DC82266427E00D479DB /* FIRUser.swift in Sources */,
+				660801D9228880EF00286A54 /* Encryption.swift in Sources */,
 				6608245F226890EB00D94CB9 /* SettingsTableViewController.swift in Sources */,
 				660D6DCE226646A800D479DB /* Download.swift in Sources */,
 				660D6DD02266471500D479DB /* CountryCode.swift in Sources */,
+				660801D7228835E600286A54 /* InviteUsersViewController.swift in Sources */,
 				66B6C6D3226CF1C700051369 /* JSQExt.swift in Sources */,
 				660820032261EAD200670CE9 /* UIViewExt.swift in Sources */,
 				66B6C6CF226C8FFC00051369 /* RecentChatCell.swift in Sources */,
@@ -453,6 +466,7 @@
 				660D6DCC2266467B00D479DB /* FIRCollection.swift in Sources */,
 				660D6DD4226647B700D479DB /* AudioViewController.swift in Sources */,
 				66091035226E2E54003376E5 /* OutgoingMessage.swift in Sources */,
+				660801D52286F78400286A54 /* GroupViewController.swift in Sources */,
 				660820062261F4FF00670CE9 /* Constants.swift in Sources */,
 				6608B16E2285ADC900C00701 /* GroupMemberCell.swift in Sources */,
 				6609D80D228339CB009F0F02 /* BackgroundCell.swift in Sources */,

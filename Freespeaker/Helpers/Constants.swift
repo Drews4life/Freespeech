@@ -28,6 +28,8 @@ public let MAP_VC = "mapVC"
 public let PICTURE_VC = "picturesVC"
 public let CONTACTS_VC = "contactsVC"
 public let CREATE_NEW_GROUP_VC = "createNewGroupVC"
+public let GROUP_VC = "groupVC"
+public let INVITE_USERS_VC = "inviteUsersVC"
 
 //CELL REUSE IDs
 public let USER_CONTACT_CELL = "userContactCell"

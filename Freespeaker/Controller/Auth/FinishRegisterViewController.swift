@@ -8,12 +8,13 @@
 
 import UIKit
 import ProgressHUD
+import ImagePicker
 
 protocol FinishRegisterDelegate {
     func didFinishRegister()
 }
 
-class FinishRegisterViewController: UIViewController {
+class FinishRegisterViewController: UIViewController, ImagePickerDelegate {
     
     @IBOutlet fileprivate weak var nameTextField: UITextField!
     @IBOutlet fileprivate weak var surnameTextField: UITextField!
@@ -30,6 +31,9 @@ class FinishRegisterViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        profileImageView.isUserInteractionEnabled = true
+        profileImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onProfileImageClick)))
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -38,6 +42,14 @@ class FinishRegisterViewController: UIViewController {
     
     @IBAction func onCancelClick(_ sender: Any) {
         navigationController?.popViewController(animated: true)
+    }
+    
+    @objc fileprivate func onProfileImageClick() {
+        let pickerVC = ImagePickerController()
+        pickerVC.delegate = self
+        pickerVC.imageLimit = 1
+        
+        present(pickerVC, animated: true, completion: nil)
     }
     
     @IBAction func onDoneClick(_ sender: Any) {
@@ -70,7 +82,7 @@ class FinishRegisterViewController: UIViewController {
         ]
         
         if let profileImg = profileImage {
-            guard let profileImgData = profileImg.jpegData(compressionQuality: 0.8) else { return }
+            guard let profileImgData = profileImg.jpegData(compressionQuality: 0.45) else { return }
             let profileImgBase64 = profileImgData.base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0))
             
             tempDictionary[kAVATAR] = profileImgBase64
@@ -121,6 +133,22 @@ class FinishRegisterViewController: UIViewController {
         }
         
         return nil
+    }
+    
+    func wrapperDidPress(_ imagePicker: ImagePickerController, images: [UIImage]) {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    func doneButtonDidPress(_ imagePicker: ImagePickerController, images: [UIImage]) {
+        guard let image = images.first else { return }
+        profileImage = image
+        profileImageView.image = image.circleMasked
+        
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    func cancelButtonDidPress(_ imagePicker: ImagePickerController) {
+        self.dismiss(animated: true, completion: nil)
     }
     
     fileprivate func clearAllInputs() {

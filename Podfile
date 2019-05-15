@@ -19,5 +19,6 @@ target 'Freespeaker' do
   pod 'IDMPhotoBrowser'
   pod 'IQAudioRecorderController'
   pod 'ImagePicker'
+  pod 'RNCryptor'
   
 end

@@ -40,7 +40,9 @@ class RecentChatCell: UITableViewCell {
     func setupCell(withRecent chatData: NSDictionary, at indexPath: IndexPath) {
         self.indexPath = indexPath
         self.usernameLbl.text = chatData[kWITHUSERFULLNAME] as? String
-        self.messageLbl.text = chatData[kLASTMESSAGE] as? String
+        
+        let decryptedText = Encryption.decrypt(chatID: chatData[kCHATROOMID] as? String ?? "", encryptedMessage: chatData[kLASTMESSAGE] as? String ?? "")
+        self.messageLbl.text = decryptedText
         
         self.lastMessageDateLbl.text = chatData[kDATE] as? String
         
